@@ -12,10 +12,11 @@ headers = {
 
 response = requests.request("GET", url, headers=headers, params=querystring)
 json_data = json.loads(response.text)
-stat = json_data['data']['covid19Stats']
+data = json_data['data']['covid19Stats']
+last_update = json_data['data']['covid19Stats'][0]['lastUpdate']
 stats = {}
 
-for x in stat:
+for x in data:
     if 'confirmed' in stats:
         stats['confirmed'] += x['confirmed']
     else:
@@ -33,8 +34,14 @@ confirmed, deaths, recovered = stats.values()
 
 
 bot = telebot.TeleBot(token)
-message_start_help = "Привет, {}! Тут ты можешь узнать полную статистику о COVID-19." \
-                     "Напиши 'Хочу знать' и я выдам тебе статистику."
+message_start_help = "Привет, {}! Тут ты можешь узнать полную статистику о COVID-19. " \
+                     "Напиши 'хочу знать' и я выдам тебе статистику."
+
+message_stat = f'Окей, вот статистика по всему миру:\n' \
+               f'Дата обновления статистики: {last_update}\n' \
+               f'Подтверждённых случаев: {confirmed}\n' \
+               f'Выздоровевших: {recovered}\n' \
+               f'Смертей: {deaths}'
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -46,20 +53,19 @@ def send_welcome(message):
 @bot.message_handler(content_types=['text'])
 def reply_to_user(message):
     if message.text.lower() == 'хочу знать':
-        bot.reply_to(message, f'Окей, вот статистика по всему миру:\n'
-                              f'Подтверждённых случаев: {confirmed}\n'
-                              f'Выздоровевших: {recovered}\n'
-                              f'Смертей: {deaths}')
+        bot.reply_to(message, message_stat)
+
     elif message.text.lower() == 'помощь':
         bot.send_message(message.chat.id, 'Ты можешь узнать полную статистику о COVID-19. '
-                                          'Напиши "Хочу знать" и я выдам тебе статистику.')
+                                          'Напиши "хочу знать" и я выдам тебе статистику.')
 
     elif message.text.lower() == 'привет' or message.text.lower() == 'привет!':
         name_user = message.json['from']['first_name']
         bot.reply_to(message, message_start_help.format(name_user))
 
     else:
-        bot.reply_to(message, 'Не понимаю, напиши "хочу знать", либо "помощь"')
+        bot.reply_to(message, 'Не понимаю, напиши "хочу знать" либо "помощь"')
 
 
-bot.polling()
+if __name__ == '__main__':
+    bot.polling()
