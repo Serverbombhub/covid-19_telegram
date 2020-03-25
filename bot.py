@@ -41,8 +41,9 @@ message_stat = f'Окей, вот статистика по всему миру:
                f'Дата обновления статистики: {last_update}\n' \
                f'Подтверждённых случаев: {confirmed}\n' \
                f'Выздоровевших: {recovered}\n' \
-               f'Смертей: {deaths}'
-
+               f'Смертей: {deaths}\n\n' \
+               f'Карта с официальной статистикой:' \
+               f'https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6'
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
