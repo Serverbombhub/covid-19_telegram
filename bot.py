@@ -13,9 +13,11 @@ headers = {
 
 bot = telebot.TeleBot(token)
 message_start_help = "Привет, {}! Тут ты можешь узнать полную статистику о COVID-19. " \
-                     "Нажми 'хочу знать' и я выдам тебе статистику."
+                     "Нажми 'хочу знать' и я выдам тебе статистику. " \
+                     "Либо можно просто получить официальную карту."
 get_stat_user = types.KeyboardButton('хочу знать')
 help_user = types.KeyboardButton('помощь')
+map_covid = types.KeyboardButton('хочу карту')
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -23,6 +25,7 @@ def send_welcome(message):
     markup = types.ReplyKeyboardMarkup(selective=True)
     name_user = message.json['from']['first_name']
     markup.row(get_stat_user, help_user)
+    markup.row(map_covid)
     bot.send_message(message.chat.id, message_start_help.format(name_user), reply_markup=markup)
 
 
@@ -63,7 +66,6 @@ def reply_to_user(message):
 
     elif message.text.lower() == 'помощь':
         markup = types.ReplyKeyboardMarkup(selective=True)
-        map_covid = types.KeyboardButton('хочу карту')
         fuck_bot = types.KeyboardButton('просто отвали')
         markup.row(get_stat_user, map_covid)
         markup.row(fuck_bot)
