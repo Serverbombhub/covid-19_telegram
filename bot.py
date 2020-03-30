@@ -1,6 +1,7 @@
 import requests
 import json
 import telebot
+from telebot import types
 from _token import token
 
 url = "https://covid-19-coronavirus-statistics.p.rapidapi.com/v1/stats"
@@ -12,13 +13,17 @@ headers = {
 
 bot = telebot.TeleBot(token)
 message_start_help = "Привет, {}! Тут ты можешь узнать полную статистику о COVID-19. " \
-                     "Напиши 'хочу знать' и я выдам тебе статистику."
+                     "Нажми 'хочу знать' и я выдам тебе статистику."
+get_stat_user = types.KeyboardButton('хочу знать')
+help_user = types.KeyboardButton('помощь')
 
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
+    markup = types.ReplyKeyboardMarkup(selective=True)
     name_user = message.json['from']['first_name']
-    bot.reply_to(message, message_start_help.format(name_user))
+    markup.row(get_stat_user, help_user)
+    bot.send_message(message.chat.id, message_start_help.format(name_user), reply_markup=markup)
 
 
 @bot.message_handler(content_types=['text'])
@@ -57,15 +62,32 @@ def reply_to_user(message):
         bot.reply_to(message, message_stat)
 
     elif message.text.lower() == 'помощь':
-        bot.send_message(message.chat.id, 'Ты можешь узнать полную статистику о COVID-19. '
-                                          'Напиши "хочу знать" и я выдам тебе статистику.')
+        markup = types.ReplyKeyboardMarkup(selective=True)
+        map_covid = types.KeyboardButton('хочу карту')
+        fuck_bot = types.KeyboardButton('просто отвали')
+        markup.row(get_stat_user, map_covid)
+        markup.row(fuck_bot)
+        bot.send_message(message.chat.id, "Ты можешь узнать полную статистику о COVID-19."
+                                          "Нажми 'хочу знать' и  выдам тебе статистику."
+                                          "Либо можно просто получить ссылку на официальную карту.", reply_markup=markup)
 
     elif message.text.lower() == 'привет' or message.text.lower() == 'привет!':
+        markup = types.ReplyKeyboardMarkup(selective=True)
+        markup.row(get_stat_user, help_user)
         name_user = message.json['from']['first_name']
-        bot.reply_to(message, message_start_help.format(name_user))
+        bot.send_message(message.chat.id, message_start_help.format(name_user), reply_markup=markup)
+
+    elif message.text.lower() == 'просто отвали':
+        bot.reply_to(message, 'Ну и ладно, мне как-то всё равно.')
+
+    elif message.text.lower() == 'хочу карту':
+        bot.reply_to(message, 'Держи: '
+                              'https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6')
 
     else:
-        bot.reply_to(message, 'Не понимаю, напиши "хочу знать" либо "помощь"')
+        markup = types.ReplyKeyboardMarkup(selective=True)
+        markup.row(get_stat_user, help_user)
+        bot.send_message(message.chat.id, 'Не понимаю, нажми "хочу знать" либо "помощь"', reply_markup=markup)
 
 
 if __name__ == '__main__':
