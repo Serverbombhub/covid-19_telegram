@@ -30,6 +30,11 @@ def send_welcome(message):
     bot.send_message(message.chat.id, message_start_help.format(name_user), reply_markup=markup)
 
 
+@bot.message_handler(content_types=['audio', 'photo', 'voice', 'video', 'document', 'location', 'contact', 'sticker'])
+def handle_docs_audio(message):
+    bot.reply_to(message, 'Не-не, такое мне не надо!')
+
+
 @bot.message_handler(func=lambda message: message.text.lower() == 'хочу знать')
 def get_stats_user(message):
     response = requests.request("GET", url, headers=headers)
@@ -100,6 +105,7 @@ def command_default(message):
     markup = types.ReplyKeyboardMarkup(selective=True)
     markup.row(get_stat_user, help_user)
     bot.send_message(message.chat.id, 'Не понимаю, нажми "хочу знать" либо "помощь"', reply_markup=markup)
+
 
 
 if __name__ == '__main__':
